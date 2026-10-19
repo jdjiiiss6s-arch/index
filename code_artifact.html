@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق السعي السنوي والدخول الوزاري | قاسم عباس</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Cairo & Tajawal) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e1e7fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #090d16;
+            color: #f3f4f6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Glowing Background Effect */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 50%);
+            filter: blur(40px);
+            animation: pulseGlow 12s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Glassmorphism Styling */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.2);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+
+        /* Number Input Arrow Removal */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Modal Animation */
+        @keyframes modalShow {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal {
+            animation: modalShow 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="selection:bg-indigo-500 selection:text-white pb-12">
+
+    <!-- Glowing Background Overlay -->
+    <div class="bg-glow"></div>
+
+    <!-- WELCOME MODAL (SPLASH SCREEN) -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-card max-w-lg w-full p-8 rounded-3xl text-center border border-indigo-500/30 animate-modal relative overflow-hidden shadow-2xl">
+            <!-- Decorative Light Aura -->
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-indigo-500/30 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/40 text-white text-3xl">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">أهلاً بك في حاسبة السعي الوزاري 🎓</h1>
+                <p class="text-gray-300 text-sm sm:text-base mb-6 leading-relaxed">
+                    التطبيق المعتمد لحساب السعي السنوي والدخول الوزاري للثالث المتوسط والسادس الإعدادي بآلية دقيقة ومحدثة.
+                </p>
+
+                <!-- Developer Tag -->
+                <div class="bg-gradient-to-r from-indigo-950/80 to-purple-950/80 border border-indigo-500/30 rounded-2xl p-4 mb-8 text-right flex items-center justify-between">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/30">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-indigo-300 block font-semibold">تمت البرمجة والتطوير بواسطة</span>
+                            <span class="text-lg font-black text-white tracking-wide">قاسم عباس</span>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 text-xs rounded-lg font-bold border border-indigo-500/30">2024-2025</span>
+                </div>
+
+                <button onclick="closeModal()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition duration-300 transform active:scale-95 flex items-center justify-center space-x-2 space-x-reverse">
+                    <span>بدء الاستخدام وتدوين الدرجات</span>
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP HEADER -->
+    <header class="pt-8 pb-6 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-4 space-x-reverse text-center md:text-right">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white text-2xl">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2 justify-center md:justify-start">
+                        وزاري <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">بلس</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">العراق</span>
+                    </h1>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-0.5">حاسبة السعي السنوي وتحديد الدخول الوزاري للمواد الـ 7</p>
+                </div>
+            </div>
+
+            <!-- Header Controls & Dev Badge -->
+            <div class="flex items-center gap-3">
+                <div class="glass-card px-4 py-2 rounded-xl flex items-center gap-2 border border-indigo-500/20 text-xs text-gray-300">
+                    <i class="fa-solid fa-user-gear text-indigo-400"></i>
+                    <span>المطور: <strong class="text-white">قاسم عباس</strong></span>
+                </div>
+                <button onclick="resetData()" class="glass-card hover:bg-rose-500/20 hover:border-rose-500/40 text-rose-400 hover:text-rose-300 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>إعادة ضبط</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-8">
+
+        <!-- DASHBOARD SUMMARY CARDS -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Overall Average Card -->
+            <div class="glass-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-r-indigo-500">
+                <div>
+                    <span class="text-xs font-semibold text-gray-400 block mb-1">المعدل العام للسعي</span>
+                    <span id="overallAvg" class="text-2xl sm:text-3xl font-black text-white">0.0</span>
+                    <span class="text-xs text-gray-400 mr-1">/ 100</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xl">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+            </div>
+
+            <!-- Passed Subjects Card -->
+            <div class="glass-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-r-emerald-500">
+                <div>
+                    <span class="text-xs font-semibold text-gray-400 block mb-1">المواد المؤهلة (الناجحة)</span>
+                    <span id="passedCount" class="text-2xl sm:text-3xl font-black text-emerald-400">0</span>
+                    <span class="text-xs text-gray-400 mr-1">من أصل 7</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <!-- Failed/Warning Subjects Card -->
+            <div class="glass-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-r-amber-500">
+                <div>
+                    <span class="text-xs font-semibold text-gray-400 block mb-1">المواد غير المؤهلة</span>
+                    <span id="warningCount" class="text-2xl sm:text-3xl font-black text-amber-400">7</span>
+                    <span class="text-xs text-gray-400 mr-1">مواد تحتاج رفع</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <!-- General Status Card -->
+            <div class="glass-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-r-purple-500">
+                <div>
+                    <span class="text-xs font-semibold text-gray-400 block mb-1">حالة الدخول الوزاري</span>
+                    <span id="overallStatus" class="text-base font-bold text-purple-300">في انتظار البيانات</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUBJECT CARDS GRID -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6" id="subjectsContainer">
+            <!-- Cards will be dynamically injected here -->
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="mt-12 text-center text-xs text-gray-500 border-t border-gray-800/80 pt-6">
+            <p class="mb-2">تطبيق حساب السعي والدخول الوزاري - تم التصميم والتطوير ببراعة بواسطة <strong class="text-indigo-400">قاسم عباس</strong></p>
+            <p class="text-gray-600">تنبيه: تحسب النتائج وفقاً للمعادلة المعتمدة (معدل ك1 + نصف السنة + معدل ك2) ÷ 3. محفوظة محلياً على جهازك.</p>
+        </footer>
+
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Subject List
+        const subjects = [
+            { id: 0, name: "التربية الإسلامية", icon: "fa-book-quran", color: "from-emerald-500 to-teal-600" },
+            { id: 1, name: "اللغة العربية", icon: "fa-feather-pointed", color: "from-amber-500 to-orange-600" },
+            { id: 2, name: "اللغة الإنجليزية", icon: "fa-language", color: "from-blue-500 to-indigo-600" },
+            { id: 3, name: "الرياضيات", icon: "fa-calculator", color: "from-purple-500 to-pink-600" },
+            { id: 4, name: "الفيزياء", icon: "fa-atom", color: "from-cyan-500 to-blue-600" },
+            { id: 5, name: "الكيمياء", icon: "fa-flask", color: "from-rose-500 to-red-600" },
+            { id: 6, name: "الأحياء", icon: "fa-dna", color: "from-green-500 to-emerald-600" }
+        ];
+
+        // Close Modal
+        function closeModal() {
+            const modal = document.getElementById('welcomeModal');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'transition-opacity', 'duration-300');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // Render Subject Cards
+        function renderSubjects() {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = subjects.map(sub => `
+                <div class="glass-card glass-card-hover rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between">
+                    <!-- Top Accent Line -->
+                    <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r ${sub.color}"></div>
+
+                    <div>
+                        <!-- Subject Title Header -->
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center space-x-3 space-x-reverse">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr ${sub.color} flex items-center justify-center text-white text-lg shadow-md">
+                                    <i class="fa-solid ${sub.icon}"></i>
+                                </div>
+                                <h2 class="text-lg font-bold text-white tracking-wide">${sub.name}</h2>
+                            </div>
+                            <span id="badge_${sub.id}" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-800 text-gray-400 border border-gray-700">
+                                لم يكتمل
+                            </span>
+                        </div>
+
+                        <!-- Course 1 Inputs -->
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-indigo-300 mb-2 flex items-center gap-1">
+                                <i class="fa-solid fa-calendar-days text-indigo-400"></i> الكورس الأول
+                            </span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[11px] text-gray-400 block mb-1">شهر 1</label>
+                                    <input type="number" min="0" max="100" id="c1m1_${sub.id}" oninput="handleInput(${sub.id})" placeholder="0"
+                                        class="w-full glass-input rounded-xl px-3 py-2 text-center text-sm font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-400 block mb-1">شهر 2</label>
+                                    <input type="number" min="0" max="100" id="c1m2_${sub.id}" oninput="handleInput(${sub.id})" placeholder="0"
+                                        class="w-full glass-input rounded-xl px-3 py-2 text-center text-sm font-bold">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Midterm Exam Input -->
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-purple-300 mb-2 flex items-center gap-1">
+                                <i class="fa-solid fa-star text-purple-400"></i> امتحان نصف السنة
+                            </span>
+                            <div>
+                                <input type="number" min="0" max="100" id="mid_${sub.id}" oninput="handleInput(${sub.id})" placeholder="درجة نصف السنة (من 100)"
+                                    class="w-full glass-input rounded-xl px-3 py-2 text-center text-sm font-bold border-purple-500/20 focus:border-purple-500">
+                            </div>
+                        </div>
+
+                        <!-- Course 2 Inputs -->
+                        <div class="mb-5">
+                            <span class="text-xs font-bold text-pink-300 mb-2 flex items-center gap-1">
+                                <i class="fa-solid fa-calendar-check text-pink-400"></i> الكورس الثاني
+                            </span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[11px] text-gray-400 block mb-1">شهر 1</label>
+                                    <input type="number" min="0" max="100" id="c2m1_${sub.id}" oninput="handleInput(${sub.id})" placeholder="0"
+                                        class="w-full glass-input rounded-xl px-3 py-2 text-center text-sm font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-400 block mb-1">شهر 2</label>
+                                    <input type="number" min="0" max="100" id="c2m2_${sub.id}" oninput="handleInput(${sub.id})" placeholder="0"
+                                        class="w-full glass-input rounded-xl px-3 py-2 text-center text-sm font-bold">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject Results Box -->
+                    <div id="resultBox_${sub.id}" class="mt-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 text-center transition">
+                        <div class="grid grid-cols-3 gap-1 text-[11px] text-gray-400 mb-2 border-b border-gray-800 pb-2">
+                            <div>ك1: <span id="avgC1_${sub.id}" class="text-white font-bold">--</span></div>
+                            <div>نصف: <span id="showMid_${sub.id}" class="text-white font-bold">--</span></div>
+                            <div>ك2: <span id="avgC2_${sub.id}" class="text-white font-bold">--</span></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-300">السعي النهائي:</span>
+                            <span id="finalScore_${sub.id}" class="text-xl font-black text-indigo-400">--</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Clamp number inputs between 0 and 100
+        function sanitizeVal(val) {
+            if (val === "" || isNaN(val)) return null;
+            let num = parseFloat(val);
+            if (num < 0) return 0;
+            if (num > 100) return 100;
+            return num;
+        }
+
+        // Handle Input & Realtime Calculation
+        function handleInput(id) {
+            saveData();
+            calculateSubject(id);
+            calculateOverall();
+        }
+
+        // Calculate Single Subject Score
+        function calculateSubject(id) {
+            const c1m1 = sanitizeVal(document.getElementById(`c1m1_${id}`).value);
+            const c1m2 = sanitizeVal(document.getElementById(`c1m2_${id}`).value);
+            const mid  = sanitizeVal(document.getElementById(`mid_${id}`).value);
+            const c2m1 = sanitizeVal(document.getElementById(`c2m1_${id}`).value);
+            const c2m2 = sanitizeVal(document.getElementById(`c2m2_${id}`).value);
+
+            // Calculate Course 1 Avg
+            let c1Avg = 0;
+            if (c1m1 !== null && c1m2 !== null) c1Avg = (c1m1 + c1m2) / 2;
+            else if (c1m1 !== null) c1Avg = c1m1;
+            else if (c1m2 !== null) c1Avg = c1m2;
+
+            // Calculate Course 2 Avg
+            let c2Avg = 0;
+            if (c2m1 !== null && c2m2 !== null) c2Avg = (c2m1 + c2m2) / 2;
+            else if (c2m1 !== null) c2Avg = c2m1;
+            else if (c2m2 !== null) c2Avg = c2m2;
+
+            const midtermVal = mid !== null ? mid : 0;
+
+            // Calculate Final Yearly Average = (Course1 + Midterm + Course2) / 3
+            const finalScore = (c1Avg + midtermVal + c2Avg) / 3;
+
+            // Display Mid Results
+            document.getElementById(`avgC1_${id}`).innerText = c1Avg.toFixed(1);
+            document.getElementById(`showMid_${id}`).innerText = midtermVal.toFixed(0);
+            document.getElementById(`avgC2_${id}`).innerText = c2Avg.toFixed(1);
+
+            const finalSpan = document.getElementById(`finalScore_${id}`);
+            const badge = document.getElementById(`badge_${id}`);
+            const resultBox = document.getElementById(`resultBox_${id}`);
+
+            const hasAnyInput = c1m1 !== null || c1m2 !== null || mid !== null || c2m1 !== null || c2m2 !== null;
+
+            if (hasAnyInput) {
+                finalSpan.innerText = finalScore.toFixed(1);
+
+                if (finalScore >= 50) {
+                    badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+                    badge.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> مؤهل للوزاري`;
+                    resultBox.className = "mt-2 bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-3.5 text-center transition";
+                    finalSpan.className = "text-xl font-black text-emerald-400";
+                } else {
+                    badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1";
+                    badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[10px]"></i> يحتاج رفع`;
+                    resultBox.className = "mt-2 bg-amber-950/30 border border-amber-500/30 rounded-2xl p-3.5 text-center transition";
+                    finalSpan.className = "text-xl font-black text-amber-400";
+                }
+            } else {
+                finalSpan.innerText = "--";
+                badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-800 text-gray-400 border border-gray-700";
+                badge.innerText = "لم يكتمل";
+                resultBox.className = "mt-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 text-center transition";
+                finalSpan.className = "text-xl font-black text-indigo-400";
+            }
+
+            return { finalScore, hasAnyInput };
+        }
+
+        // Calculate Dashboard Stats
+        function calculateOverall() {
+            let totalScore = 0;
+            let passedCount = 0;
+            let warningCount = 0;
+            let activeSubjectsCount = 0;
+
+            subjects.forEach(sub => {
+                const c1m1 = sanitizeVal(document.getElementById(`c1m1_${sub.id}`).value);
+                const c1m2 = sanitizeVal(document.getElementById(`c1m2_${sub.id}`).value);
+                const mid  = sanitizeVal(document.getElementById(`mid_${sub.id}`).value);
+                const c2m1 = sanitizeVal(document.getElementById(`c2m1_${sub.id}`).value);
+                const c2m2 = sanitizeVal(document.getElementById(`c2m2_${sub.id}`).value);
+
+                let c1Avg = (c1m1 || 0) + (c1m2 || 0);
+                if (c1m1 !== null && c1m2 !== null) c1Avg /= 2;
+
+                let c2Avg = (c2m1 || 0) + (c2m2 || 0);
+                if (c2m1 !== null && c2m2 !== null) c2Avg /= 2;
+
+                const midVal = mid || 0;
+                const score = (c1Avg + midVal + c2Avg) / 3;
+
+                totalScore += score;
+
+                if (score >= 50) {
+                    passedCount++;
+                } else {
+                    warningCount++;
+                }
+            });
+
+            const overallAverage = (totalScore / subjects.length).toFixed(1);
+
+            document.getElementById('overallAvg').innerText = overallAverage;
+            document.getElementById('passedCount').innerText = passedCount;
+            document.getElementById('warningCount').innerText = warningCount;
+
+            const overallStatus = document.getElementById('overallStatus');
+            if (passedCount === 7) {
+                overallStatus.innerText = "مؤهل بالكامل 🎉";
+                overallStatus.className = "text-base font-bold text-emerald-400";
+            } else if (passedCount >= 4) {
+                overallStatus.innerText = "دخول مشروط / جيدة 👍";
+                overallStatus.className = "text-base font-bold text-indigo-300";
+            } else {
+                overallStatus.innerText = "يحتاج تحسين الـسعي ⚠️";
+                overallStatus.className = "text-base font-bold text-amber-400";
+            }
+        }
+
+        // Save Data to LocalStorage
+        function saveData() {
+            let data = {};
+            subjects.forEach(sub => {
+                data[`c1m1_${sub.id}`] = document.getElementById(`c1m1_${sub.id}`).value;
+                data[`c1m2_${sub.id}`] = document.getElementById(`c1m2_${sub.id}`).value;
+                data[`mid_${sub.id}`]   = document.getElementById(`mid_${sub.id}`).value;
+                data[`c2m1_${sub.id}`] = document.getElementById(`c2m1_${sub.id}`).value;
+                data[`c2m2_${sub.id}`] = document.getElementById(`c2m2_${sub.id}`).value;
+            });
+            localStorage.setItem('iq_wazari_app_data', JSON.stringify(data));
+        }
+
+        // Load Data from LocalStorage
+        function loadData() {
+            let saved = localStorage.getItem('iq_wazari_app_data');
+            if (saved) {
+                let data = JSON.parse(saved);
+                subjects.forEach(sub => {
+                    if (data[`c1m1_${sub.id}`] !== undefined) document.getElementById(`c1m1_${sub.id}`).value = data[`c1m1_${sub.id}`];
+                    if (data[`c1m2_${sub.id}`] !== undefined) document.getElementById(`c1m2_${sub.id}`).value = data[`c1m2_${sub.id}`];
+                    if (data[`mid_${sub.id}`] !== undefined)   document.getElementById(`mid_${sub.id}`).value   = data[`mid_${sub.id}`];
+                    if (data[`c2m1_${sub.id}`] !== undefined) document.getElementById(`c2m1_${sub.id}`).value = data[`c2m1_${sub.id}`];
+                    if (data[`c2m2_${sub.id}`] !== undefined) document.getElementById(`c2m2_${sub.id}`).value = data[`c2m2_${sub.id}`];
+                    calculateSubject(sub.id);
+                });
+                calculateOverall();
+            }
+        }
+
+        // Reset Data
+        function resetData() {
+            if (confirm("هل أنت تأكد من إرادتك لمسح جميع الدرجات المدخلة؟")) {
+                localStorage.removeItem('iq_wazari_app_data');
+                subjects.forEach(sub => {
+                    document.getElementById(`c1m1_${sub.id}`).value = "";
+                    document.getElementById(`c1m2_${sub.id}`).value = "";
+                    document.getElementById(`mid_${sub.id}`).value   = "";
+                    document.getElementById(`c2m1_${sub.id}`).value = "";
+                    document.getElementById(`c2m2_${sub.id}`).value = "";
+                    calculateSubject(sub.id);
+                });
+                calculateOverall();
+            }
+        }
+
+        // App Initialization
+        window.onload = function() {
+            renderSubjects();
+            loadData();
+        };
+    </script>
+</body>
+</html>
