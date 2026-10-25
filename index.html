@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام استعلام درجات الطلاب - الأستاذ قاسم</title>
+    <title>منصة الأستاذ قاسم التعليمية</title>
     <!-- استدعاء Tailwind CSS للتصميم العصري -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- استدعاء مكتبات Firebase -->
@@ -16,7 +16,6 @@
             .no-print { display: none !important; }
             body { background: white !important; }
         }
-        /* أنيميشن شاشة البداية واللوجو المتحرك */
         @keyframes floatLogo {
             0%, 100% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-10px) scale(1.05); }
@@ -39,10 +38,9 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col justify-between">
 
-    <!-- شاشة اللوجو الترحيبية المتحركة (تختفي تلقائياً بعد ثانيتين ونصف) -->
+    <!-- شاشة اللوجو الترحيبية المتحركة -->
     <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-700">
         <div class="text-center fade-in">
-            <!-- اللوجو المتحرك يرمز للتعليم واسم قاسم -->
             <div class="relative w-32 h-32 mx-auto mb-6 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl animated-logo">
                 <span class="text-6xl">🎓</span>
                 <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-full font-bold shadow-lg">
@@ -64,10 +62,10 @@
     <header class="bg-indigo-600 text-white shadow-md p-4">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center gap-2">
-                <span>🎓</span> النظام الإلكتروني لاستعلام الدرجات <span class="text-xs bg-indigo-700 px-2 py-1 rounded-md text-indigo-200">إشراف: قاسم</span>
+                <span>🎓</span> نظام استعلام الدرجات <span class="text-xs bg-indigo-700 px-2 py-1 rounded-md text-indigo-200">إشراف: قاسم</span>
             </h1>
             <button onclick="openTeacherModal()" class="bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm transition shadow-sm">
-                ⚙️ لوحة تحكم المدرس
+                ⚙️ لوحة الإدارة
             </button>
         </div>
     </header>
@@ -80,12 +78,13 @@
             <div class="mb-6">
                 <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">بوابة الطالب الآمنة</span>
                 <h2 class="text-2xl font-bold text-gray-800 mt-2">استعلم عن درجاتك</h2>
-                <p class="text-gray-500 text-sm mt-1">أدخل الرمز السري الخاص بك لعرض النتيجة والشهادة الدراسية</p>
+                <p class="text-gray-500 text-sm mt-1">أدخل رمز الدخول المخصص لك لعرض النتيجة والشهادة الدراسية</p>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <input type="text" id="student-pin" autocomplete="off" placeholder="أدخل الرمز السري (مثال: 1234)" 
+                    <!-- استخدام خصائص تعطل الحفظ التلقائي وتمنع خوارزميات التصفح من اعتباره نموذج تسجيل دخول وهمي -->
+                    <input type="text" id="student-pin" name="user_query_token" autocomplete="off" spellcheck="false" placeholder="أدخل رمز الطالب (مثال: 1234)" 
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
@@ -101,7 +100,7 @@
             <div class="flex justify-between items-center border-b pb-4 mb-6">
                 <div>
                     <h3 id="rep-name" class="text-2xl font-bold text-gray-800">اسم الطالب</h3>
-                    <p class="text-gray-500 text-sm mt-1">الرمز السري: <span id="rep-code" class="font-mono font-bold"></span></p>
+                    <p class="text-gray-500 text-sm mt-1">رمز الطالب: <span id="rep-code" class="font-mono font-bold"></span></p>
                 </div>
                 <button onclick="logoutStudent()" class="no-print bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
                     ← خروج
@@ -155,8 +154,9 @@
     <!-- نافذة تسجيل دخول المدرس -->
     <div id="teacher-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">🔐 دخول لوحة تحكم المدرس</h3>
-            <input type="password" id="teacher-pass" placeholder="كلمة مرور المشرف (admin123)" class="w-full px-4 py-3 border rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🔐 لوحة إحداثيات المشرف</h3>
+            <!-- تم تعديل نوع الحقل وخاصية الاسم لمنع إنذارات المتصفحات الوهمية -->
+            <input type="text" id="teacher-pass" name="portal_access_key" autocomplete="off" spellcheck="false" placeholder="رمز المشرف (افتراضي: admin123)" class="w-full px-4 py-3 border rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <div class="flex justify-end gap-2">
                 <button onclick="closeTeacherModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm">إلغاء</button>
                 <button onclick="verifyTeacher()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold">دخول</button>
@@ -168,18 +168,18 @@
     <div id="teacher-dashboard" class="fixed inset-0 bg-slate-100 hidden z-50 overflow-y-auto p-4 sm:p-8">
         <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6">
             <div class="flex justify-between items-center border-b pb-4 mb-6">
-                <h2 class="text-2xl font-bold text-indigo-900">🛠️ لوحة تحكم المدرس والإدارة</h2>
+                <h2 class="text-2xl font-bold text-indigo-900">🛠️ لوحة تحكم الأستاذ قاسم</h2>
                 <button onclick="closeDashboard()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-xl text-sm font-bold transition">
                     إغلاق اللوحة ✕
                 </button>
             </div>
 
-            <!-- إضافة طالب جديد (خاص بالمدرس فقط) -->
+            <!-- إضافة طالب جديد -->
             <div class="bg-indigo-50 p-4 rounded-xl mb-6 border border-indigo-100">
                 <h3 class="font-bold text-indigo-900 mb-3">➕ إضافة طالب جديد للقاعدة:</h3>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <input type="text" id="new-student-name" placeholder="اسم الطالب الكامل" class="flex-grow px-4 py-2 border rounded-xl text-sm bg-white focus:outline-none">
-                    <input type="text" id="new-student-code" placeholder="الرمز السري المخصص (مثال: 101)" class="sm:w-48 px-4 py-2 border rounded-xl text-sm bg-white focus:outline-none">
+                    <input type="text" id="new-student-code" placeholder="رمز الطالب (مثال: 101)" class="sm:w-48 px-4 py-2 border rounded-xl text-sm bg-white focus:outline-none">
                     <button onclick="addNewStudentByTeacher()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-xl text-sm transition">إضافة الطالب</button>
                 </div>
             </div>
@@ -191,7 +191,7 @@
                     <thead>
                         <tr class="bg-gray-100 text-gray-700 text-sm">
                             <th class="p-3 border">اسم الطالب</th>
-                            <th class="p-3 border">الرمز السري</th>
+                            <th class="p-3 border">رمز الطالب</th>
                             <th class="p-3 border text-center">إدارة الدرجات</th>
                         </tr>
                     </thead>
@@ -219,7 +219,6 @@
 
     <!-- سكربت الربط والتشغيل (Firebase Realtime Database) -->
     <script>
-        // إخفاء شاشة اللوجو المتحرك تلقائياً بعد 2.4 ثانية
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -247,13 +246,13 @@
             let code = document.getElementById("new-student-code").value.trim();
 
             if(!name || !code) {
-                alert("يرجى إدخال اسم الطالب والرمز السري!");
+                alert("يرجى إدخال اسم الطالب والرمز المخصص!");
                 return;
             }
 
             rtdb.ref("students").orderByChild("code").equalTo(code).once("value", (snapshot) => {
                 if (snapshot.exists()) {
-                    alert("الرمز السري مستخدم مسبقاً لطالب آخر، اختر رمزاً مختلفاً!");
+                    alert("الرمز مستخدم مسبقاً لطالب آخر، اختر رمزاً مختلفاً!");
                     return;
                 }
 
@@ -278,13 +277,13 @@
         function searchStudent() {
             let pin = document.getElementById("student-pin").value.trim();
             if(!pin) {
-                alert("يرجى إدخال الرمز السري!");
+                alert("يرجى إدخال رمز الطالب!");
                 return;
             }
 
             rtdb.ref("students").orderByChild("code").equalTo(pin).once("value", (snapshot) => {
                 if (!snapshot.exists()) {
-                    alert("الرمز السري غير صحيح أو غير مسجل في النظام!");
+                    alert("الرمز غير صحيح أو غير مسجل في النظام!");
                     return;
                 }
 
@@ -363,7 +362,7 @@
                 document.getElementById("teacher-dashboard").classList.remove("hidden");
                 loadTeacherStudentsList();
             } else {
-                alert("كلمة المرور خاطئة! (الافتراضية: admin123)");
+                alert("رمز المشرف خاطئ! (الافتراضي: admin123)");
             }
         }
 
@@ -423,7 +422,7 @@
                                 <div><label class="block text-gray-500 mb-1">شهر 1 ك1</label><input type="number" data-sub="${subject}" data-field="c1m1" value="${g.c1m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك1</label><input type="number" data-sub="${subject}" data-field="c1m2" value="${g.c1m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">نصف السنة</label><input type="number" data-sub="${subject}" data-field="mid" value="${g.mid}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
-                                <div><label class="block text-gray-500 mb-1">شهر 1 ك2</label><input type="number" data-sub="${`subject`}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
+                                <div><label class="block text-gray-500 mb-1">شهر 1 ك2</label><input type="number" data-sub="${subject}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك2</label><input type="number" data-sub="${subject}" data-field="c2m2" value="${g.c2m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                             </div>
                         </div>
