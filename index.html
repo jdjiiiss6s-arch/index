@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام استعلام درجات الطلاب</title>
+    <title>نظام استعلام درجات الطلاب - الأستاذ قاسم</title>
     <!-- استدعاء Tailwind CSS للتصميم العصري -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- استدعاء مكتبات Firebase -->
@@ -16,15 +16,57 @@
             .no-print { display: none !important; }
             body { background: white !important; }
         }
+        /* أنيميشن شاشة البداية واللوجو المتحرك */
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.6)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 25px rgba(79, 70, 229, 0.9)); }
+        }
+        .animated-logo {
+            animation: floatLogo 3s ease-in-out infinite, pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col justify-between">
 
+    <!-- شاشة اللوجو الترحيبية المتحركة (تختفي تلقائياً بعد ثانيتين ونصف) -->
+    <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-700">
+        <div class="text-center fade-in">
+            <!-- اللوجو المتحرك يرمز للتعليم واسم قاسم -->
+            <div class="relative w-32 h-32 mx-auto mb-6 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl animated-logo">
+                <span class="text-6xl">🎓</span>
+                <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-full font-bold shadow-lg">
+                    قاسم
+                </div>
+            </div>
+            <h1 class="text-3xl font-black tracking-wider mb-2">منصة الأستاذ قاسم التعليمية</h1>
+            <p class="text-indigo-200 text-sm tracking-wide">نظام استعلام درجات الطلاب المتطور</p>
+            
+            <div class="mt-8 flex justify-center items-center gap-2">
+                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-.2s]"></div>
+                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-.4s]"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- الهيدر -->
     <header class="bg-indigo-600 text-white shadow-md p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">🎓 النظام الإلكتروني لاستعلام الدرجات</h1>
-            <button onclick="openTeacherModal()" class="bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm transition">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span>🎓</span> النظام الإلكتروني لاستعلام الدرجات <span class="text-xs bg-indigo-700 px-2 py-1 rounded-md text-indigo-200">إشراف: قاسم</span>
+            </h1>
+            <button onclick="openTeacherModal()" class="bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm transition shadow-sm">
                 ⚙️ لوحة تحكم المدرس
             </button>
         </div>
@@ -43,7 +85,6 @@
 
             <div class="space-y-4">
                 <div>
-                    <!-- تم تغيير نوع الحقل إلى text وإزالة خصائص الـ password الوهمية لمنع إنذارات الانتحار/التصيد -->
                     <input type="text" id="student-pin" autocomplete="off" placeholder="أدخل الرمز السري (مثال: 1234)" 
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
@@ -178,6 +219,15 @@
 
     <!-- سكربت الربط والتشغيل (Firebase Realtime Database) -->
     <script>
+        // إخفاء شاشة اللوجو المتحرك تلقائياً بعد 2.4 ثانية
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.remove(), 700);
+            }, 2400);
+        });
+
         const firebaseConfig = {
             databaseURL: "https://student-grades-1fe83-default-rtdb.firebaseio.com/"
         };
@@ -192,7 +242,6 @@
 
         let currentEditingStudentKey = null;
 
-        // إضافة طالب جديد من قِبل المدرس حصراً من داخل اللوحة
         function addNewStudentByTeacher() {
             let name = document.getElementById("new-student-name").value.trim();
             let code = document.getElementById("new-student-code").value.trim();
@@ -204,7 +253,7 @@
 
             rtdb.ref("students").orderByChild("code").equalTo(code).once("value", (snapshot) => {
                 if (snapshot.exists()) {
-                    alert("الرمز السري مستخدم مسبقاً لطالب آخر، ياختر رمزاً مختلفاً!");
+                    alert("الرمز السري مستخدم مسبقاً لطالب آخر، اختر رمزاً مختلفاً!");
                     return;
                 }
 
@@ -374,7 +423,7 @@
                                 <div><label class="block text-gray-500 mb-1">شهر 1 ك1</label><input type="number" data-sub="${subject}" data-field="c1m1" value="${g.c1m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك1</label><input type="number" data-sub="${subject}" data-field="c1m2" value="${g.c1m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">نصف السنة</label><input type="number" data-sub="${subject}" data-field="mid" value="${g.mid}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
-                                <div><label class="block text-gray-500 mb-1" >شهر 1 ك2</label><input type="number" data-sub="${subject}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
+                                <div><label class="block text-gray-500 mb-1">شهر 1 ك2</label><input type="number" data-sub="${`subject`}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك2</label><input type="number" data-sub="${subject}" data-field="c2m2" value="${g.c2m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                             </div>
                         </div>
