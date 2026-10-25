@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام استعلام درجات الطلاب (متصل بـ Firebase)</title>
+    <title>نظام استعلام درجات الطلاب</title>
     <!-- استدعاء Tailwind CSS للتصميم العصري -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- استدعاء مكتبات Firebase -->
@@ -33,26 +33,22 @@
     <!-- المحتوى الرئيسي -->
     <main class="container mx-auto p-4 flex-grow flex items-center justify-center">
         
-        <!-- شاشة تسجيل أو استعلام الطالب -->
+        <!-- شاشة استعلام الطالب -->
         <div id="student-login-card" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
             <div class="mb-6">
                 <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">بوابة الطالب الآمنة</span>
-                <h2 class="text-2xl font-bold text-gray-800 mt-2">استعلم أو سجل بياناتك</h2>
-                <p class="text-gray-500 text-sm mt-1">أدخل اسمك ورمزك السري للتسجيل لأول مرة، أو الرمز للاستعلام</p>
+                <h2 class="text-2xl font-bold text-gray-800 mt-2">استعلم عن درجاتك</h2>
+                <p class="text-gray-500 text-sm mt-1">أدخل الرمز السري الخاص بك لعرض النتيجة والشهادة الدراسية</p>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <input type="text" id="student-name-reg" placeholder="اسم الطالب الكامل (عند التسجيل لأول مرة)" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-md focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-3">
-                    <input type="password" id="student-pin" placeholder="أدخل الرمز السري (مثال: 1234)" 
+                    <!-- تم تغيير نوع الحقل إلى text وإزالة خصائص الـ password الوهمية لمنع إنذارات الانتحار/التصيد -->
+                    <input type="text" id="student-pin" autocomplete="off" placeholder="أدخل الرمز السري (مثال: 1234)" 
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="registerStudent()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-lg text-sm">
-                        ✍️ تسجيل جديد
-                    </button>
-                    <button onclick="searchStudent()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg text-sm">
+                <div>
+                    <button onclick="searchStudent()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg text-sm">
                         🔍 عرض النتيجة
                     </button>
                 </div>
@@ -137,6 +133,16 @@
                 </button>
             </div>
 
+            <!-- إضافة طالب جديد (خاص بالمدرس فقط) -->
+            <div class="bg-indigo-50 p-4 rounded-xl mb-6 border border-indigo-100">
+                <h3 class="font-bold text-indigo-900 mb-3">➕ إضافة طالب جديد للقاعدة:</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="new-student-name" placeholder="اسم الطالب الكامل" class="flex-grow px-4 py-2 border rounded-xl text-sm bg-white focus:outline-none">
+                    <input type="text" id="new-student-code" placeholder="الرمز السري المخصص (مثال: 101)" class="sm:w-48 px-4 py-2 border rounded-xl text-sm bg-white focus:outline-none">
+                    <button onclick="addNewStudentByTeacher()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-xl text-sm transition">إضافة الطالب</button>
+                </div>
+            </div>
+
             <!-- قائمة الطلاب المسجلين -->
             <h3 class="font-bold text-gray-800 mb-3">📋 الطلاب المسجلون في السحابة:</h3>
             <div class="overflow-x-auto">
@@ -186,18 +192,19 @@
 
         let currentEditingStudentKey = null;
 
-        function registerStudent() {
-            let name = document.getElementById("student-name-reg").value.trim();
-            let code = document.getElementById("student-pin").value.trim();
-            
+        // إضافة طالب جديد من قِبل المدرس حصراً من داخل اللوحة
+        function addNewStudentByTeacher() {
+            let name = document.getElementById("new-student-name").value.trim();
+            let code = document.getElementById("new-student-code").value.trim();
+
             if(!name || !code) {
-                alert("يرجى إدخال اسم الطالب والرمز السري لتسجيل الحساب!");
+                alert("يرجى إدخال اسم الطالب والرمز السري!");
                 return;
             }
 
             rtdb.ref("students").orderByChild("code").equalTo(code).once("value", (snapshot) => {
                 if (snapshot.exists()) {
-                    alert("الرمز السري مستخدم مسبقاً، يجوز لك الاستعلام مباشرة أو اختيار رمز آخر!");
+                    alert("الرمز السري مستخدم مسبقاً لطالب آخر، ياختر رمزاً مختلفاً!");
                     return;
                 }
 
@@ -208,9 +215,12 @@
                     grades: {}
                 }, (error) => {
                     if(error) {
-                        alert("حدث خطأ أثناء التسجيل!");
+                        alert("حدث خطأ أثناء إضافة الطالب!");
                     } else {
-                        alert("تم تسجيل حسابك بنجاح! يمكنك الآن الضغط على عرض النتيجة.");
+                        alert("تم إضافة الطالب بنجاح!");
+                        document.getElementById("new-student-name").value = "";
+                        document.getElementById("new-student-code").value = "";
+                        loadTeacherStudentsList();
                     }
                 });
             });
@@ -225,7 +235,7 @@
 
             rtdb.ref("students").orderByChild("code").equalTo(pin).once("value", (snapshot) => {
                 if (!snapshot.exists()) {
-                    alert("الرمز السري غير صحيح أو لم تقم بالتسجيل بعد!");
+                    alert("الرمز السري غير صحيح أو غير مسجل في النظام!");
                     return;
                 }
 
@@ -291,7 +301,6 @@
             document.getElementById("student-report-card").classList.add("hidden");
             document.getElementById("student-login-card").classList.remove("hidden");
             document.getElementById("student-pin").value = "";
-            document.getElementById("student-name-reg").value = "";
         }
 
         function openTeacherModal() { document.getElementById("teacher-modal").classList.remove("hidden"); }
@@ -365,7 +374,7 @@
                                 <div><label class="block text-gray-500 mb-1">شهر 1 ك1</label><input type="number" data-sub="${subject}" data-field="c1m1" value="${g.c1m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك1</label><input type="number" data-sub="${subject}" data-field="c1m2" value="${g.c1m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">نصف السنة</label><input type="number" data-sub="${subject}" data-field="mid" value="${g.mid}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
-                                <div><label class="block text-gray-500 mb-1">شهر 1 ك2</label><input type="number" data-sub="${subject}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
+                                <div><label class="block text-gray-500 mb-1" >شهر 1 ك2</label><input type="number" data-sub="${subject}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                                 <div><label class="block text-gray-500 mb-1">شهر 2 ك2</label><input type="number" data-sub="${subject}" data-field="c2m2" value="${g.c2m2}" class="grade-input w-full p-1 border rounded text-center bg-white"></div>
                             </div>
                         </div>
