@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام استعلام درجات السادس العلمي (متصل بـ Firebase)</title>
+    <title>نظام استعلام درجات السادس العلمي | تصميم وبرمجة قاسم</title>
     <!-- استدعاء Tailwind CSS للتصميم العصري -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -21,14 +21,135 @@
             .no-print { display: none !important; }
             body { background: white !important; }
         }
+
+        /* أنيميشن مقدمة اللوكو والهوية البصرية (9 ثواني) */
+        #intro-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeOutSplash 1s ease forwards;
+            animation-delay: 8.5s; /* يبدأ الاختفاء في الثانية 8.5 */
+        }
+
+        .logo-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
+            animation: pulseGlow 2s infinite alternate, rotateLogo 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
+            100% { transform: scale(1.08); box-shadow: 0 0 60px rgba(168, 85, 247, 0.8); }
+        }
+
+        @keyframes rotateLogo {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(3deg) scale(1.05); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .intro-title {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards;
+            animation-delay: 0.8s;
+        }
+
+        .intro-subtitle {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards;
+            animation-delay: 1.8s;
+        }
+
+        .intro-badge {
+            opacity: 0;
+            transform: scale(0.8);
+            animation: scaleIn 0.8s ease forwards;
+            animation-delay: 2.8s;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeOutSplash {
+            to { opacity: 0; visibility: hidden; pointer-events: none; }
+        }
+
+        /* شريط التقدم للـ 9 ثواني */
+        .progress-bar-container {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 30px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 3.5s;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #38bdf8);
+            animation: fillProgress 5s linear forwards;
+            animation-delay: 3.5s;
+        }
+
+        @keyframes fillProgress {
+            to { width: 100%; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
 
+    <!-- مقدمة اللوكو الاستعراضية (9 ثواني) -->
+    <div id="intro-splash">
+        <div class="logo-container mb-6">
+            <!-- أيقونة تدمج البرمجة والتصميم (< / > و قلم تصميم) -->
+            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+        </div>
+        <h1 class="intro-title text-3xl sm:text-4xl font-black text-white tracking-wide">قاسم</h1>
+        <p class="intro-subtitle text-indigo-300 text-sm sm:text-base font-semibold mt-2 tracking-wider">هوية بصريه • برمجة وتصميم احترافي</p>
+        
+        <div class="intro-badge mt-4">
+            <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-4 py-1.5 rounded-full backdrop-blur-md">
+                ✨ جاري إطلاق النظام التجريبي...
+            </span>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+
     <!-- الهيدر -->
     <header class="bg-indigo-600 dark:bg-indigo-900 text-white shadow-md p-4 transition-colors duration-300">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">🎓 استعلام درجات السادس العلمي</h1>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span>🎓 استعلام درجات السادس العلمي</span>
+                <span class="text-xs bg-indigo-500/50 px-2 py-0.5 rounded text-indigo-100 font-mono">Dev: قاسم</span>
+            </h1>
             <div class="flex items-center gap-2">
                 <button onclick="toggleDarkMode()" class="bg-indigo-700 dark:bg-indigo-800 hover:bg-indigo-800 p-2 rounded-lg text-sm transition" title="تبديل الوضع الليلي">
                     🌙 / ☀️
@@ -132,6 +253,11 @@
         </div>
 
     </main>
+
+    <!-- الفوتر -->
+    <footer class="py-4 text-center text-xs text-slate-500 dark:text-slate-400 border-t dark:border-slate-800">
+        تم التصميم والبرمجة بواسطة <span class="font-bold text-indigo-600 dark:text-indigo-400">قاسم</span> &copy; 2026
+    </footer>
 
     <!-- سكربت الربط والتشغيل (Firebase Realtime Database) -->
     <script>
@@ -276,7 +402,7 @@
                         <td class="p-2.5 border dark:border-slate-700 text-center">${g.c1m2}</td>
                         <td class="p-2.5 border dark:border-slate-700 text-center font-bold text-indigo-600 dark:text-indigo-400">${c1Saei}</td>
                         <td class="p-2.5 border dark:border-slate-700 text-center">${g.mid}</td>
-                        <td class="p-2.5 border dark:border-` + `slate-700 text-center">${g.c2m1}</td>
+                        <td class="p-2.5 border dark:border-slate-700 text-center">${g.c2m1}</td>
                         <td class="p-2.5 border dark:border-slate-700 text-center">${g.c2m2}</td>
                         <td class="p-2.5 border dark:border-slate-700 text-center font-bold text-indigo-600 dark:text-indigo-400">${c2Saei}</td>
                         <td class="p-2.5 border dark:border-slate-700 text-center font-black bg-indigo-50/50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200">${finalSubAvg}%</td>
