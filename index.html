@@ -38,20 +38,31 @@
     </header>
 
     <!-- المحتوى الرئيسي -->
-    <main class="container mx-auto p-4 flex-grow flex items-center justify-center">
+    <main class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
         
         <!-- شاشة تسجيل أو استعلام الطالب -->
         <div id="student-login-card" class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md text-center transition-colors duration-300">
             <div class="mb-6">
                 <span class="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">بوابة الطالب الآمنة</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-2">استعلم أو سجل بياناتك</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">أدخل اسمك الكامل ورمزك السري للتسجيل لأول مرة، أو الرمز فقط للاستعلام</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">أدخل اسمك، شعبتك، ورمزك السري للتسجيل، أو الرمز فقط للاستعلام</p>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <input type="text" id="student-name-reg" placeholder="اسم الطالب الكامل (عند التسجيل لأول مرة)" 
                         class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-xl text-center text-md focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-3">
+                    
+                    <!-- اختيار الشعبة -->
+                    <select id="student-section-reg" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-xl text-center text-md focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-3">
+                        <option value="">-- اختر الشعبة الدراسية --</option>
+                        <option value="أ">الشعبة أ</option>
+                        <option value="ب">الشعبة ب</option>
+                        <option value="ج">الشعبة ج</option>
+                        <option value="د">الشعبة د</option>
+                        <option value="هـ">الشعبة هـ</option>
+                    </select>
+
                     <input type="password" id="student-pin" placeholder="أدخل الرمز السري (مثال: 1234)" 
                         class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
@@ -71,7 +82,7 @@
             <div class="flex justify-between items-center border-b dark:border-slate-700 pb-4 mb-6">
                 <div>
                     <h3 id="rep-name" class="text-2xl font-bold text-gray-800 dark:text-white">اسم الطالب</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">الرمز السري: <span id="rep-code" class="font-mono font-bold"></span> | الفرع: السادس العلمي</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">الرمز السري: <span id="rep-code" class="font-mono font-bold"></span> | الشعبة: <span id="rep-section" class="font-bold text-indigo-600 dark:text-indigo-400"></span> | الفرع: السادس العلمي</p>
                 </div>
                 <button onclick="logoutStudent()" class="no-print bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm transition">
                     ← خروج
@@ -122,6 +133,24 @@
 
     </main>
 
+    <!-- قسم لعرض الطلاب مقسمين حسب الشعب (اختياري للإدارة) -->
+    <section class="container mx-auto p-4 mb-8">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl">
+            <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">📚 عزل الطلاب حسب الشعبة</h3>
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                <button onclick="filterBySection('الكل')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold">الكل</button>
+                <button onclick="filterBySection('أ')" class="bg-slate-200 dark:bg-slate-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 hover:text-white">شعبة أ</button>
+                <button onclick="filterBySection('ب')" class="bg-slate-200 dark:bg-slate-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 hover:text-white">شعبة ب</button>
+                <button onclick="filterBySection('ج')" class="bg-slate-200 dark:bg-slate-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 hover:text-white">شعبة ج</button>
+                <button onclick="filterBySection('د')" class="bg-slate-200 dark:bg-slate-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 hover:text-white">شعبة د</button>
+                <button onclick="filterBySection('هـ')" class="bg-slate-200 dark:bg-slate-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 hover:text-white">شعبة هـ</button>
+            </div>
+            <div id="sections-students-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- يتم تعبئتها برمجياً بالطلاب مفروزين حسب الشعبة -->
+            </div>
+        </div>
+    </section>
+
     <!-- سكربت الربط والتشغيل (Firebase Realtime Database) -->
     <script>
         const firebaseConfig = {
@@ -131,7 +160,7 @@
         firebase.initializeApp(firebaseConfig);
         const rtdb = firebase.database();
 
-        // مواد السادس العلمي الشاملة (تشمل الأحيائي والتطبيقي والعام)
+        // مواد السادس العلمي الشاملة
         const subjectsList = [
             "التربية الإسلامية", 
             "اللغة العربية", 
@@ -142,6 +171,44 @@
             "الأحياء", 
             "الاقتصاد"
         ];
+
+        let allStudentsData = {};
+
+        // جلب الطلاب وعرضهم فوراً للفرز حسب الشعب
+        rtdb.ref("students").on("value", (snapshot) => {
+            if (snapshot.exists()) {
+                allStudentsData = snapshot.val();
+                renderStudentsList('الكل');
+            } else {
+                document.getElementById("sections-students-list").innerHTML = '<p class="text-gray-500 text-sm">لا توجد بيانات مسجلة حتى الآن.</p>';
+            }
+        });
+
+        function renderStudentsList(sectionFilter) {
+            let container = document.getElementById("sections-students-list");
+            container.innerHTML = "";
+
+            Object.keys(allStudentsData).forEach(key => {
+                let st = allStudentsData[key];
+                let stSection = st.section || "غير محدد";
+
+                if (sectionFilter === 'الكل' || stSection === sectionFilter) {
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 p-3 rounded-xl flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800 dark:text-white">${st.name}</h4>
+                                <span class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">الشعبة: ${stSection}</span>
+                            </div>
+                            <span class="text-xs bg-gray-200 dark:bg-slate-800 px-2 py-1 rounded font-mono">الرمز: ${st.code}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function filterBySection(sec) {
+            renderStudentsList(sec);
+        }
 
         // التحقق من الوضع الليلي المخزن مسبقاً
         if (localStorage.getItem('theme') === 'dark') {
@@ -160,10 +227,11 @@
 
         function registerStudent() {
             let name = document.getElementById("student-name-reg").value.trim();
+            let section = document.getElementById("student-section-reg").value;
             let code = document.getElementById("student-pin").value.trim();
             
-            if(!name || !code) {
-                alert("يرجى إدخال اسم الطالب الكامل والرمز السري لتسجيل الحساب!");
+            if(!name || !section || !code) {
+                alert("يرجى إدخال اسم الطالب الكامل، اختيار الشعبة، وإدخال الرمز السري!");
                 return;
             }
 
@@ -176,13 +244,14 @@
                 let newRef = rtdb.ref("students").push();
                 newRef.set({
                     name: name,
+                    section: section,
                     code: code,
                     grades: {}
                 }, (error) => {
                     if(error) {
                         alert("حدث خطأ أثناء التسجيل!");
                     } else {
-                        alert("تم تسجيل حسابك بنجاح! يمكنك الآن الضغط على عرض النتيجة.");
+                        alert("تم تسجيل حسابك بنجاح ضمن (الشعبة " + section + ")! يمكنك الآن الاستعلام برمزك.");
                     }
                 });
             });
@@ -216,6 +285,7 @@
 
             document.getElementById("rep-name").innerText = data.name;
             document.getElementById("rep-code").innerText = data.code;
+            document.getElementById("rep-section").innerText = data.section || "غير محدد";
 
             let tbody = document.getElementById("grades-table-body");
             tbody.innerHTML = "";
@@ -264,6 +334,7 @@
             document.getElementById("student-login-card").classList.remove("hidden");
             document.getElementById("student-pin").value = "";
             document.getElementById("student-name-reg").value = "";
+            document.getElementById("student-section-reg").value = "";
         }
     </script>
 </body>
