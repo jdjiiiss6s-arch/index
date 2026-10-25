@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المدرس الإدارية - السادس العلمي</title>
+    <!-- استدعاء Tailwind CSS للتصميم العصري -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <!-- استدعاء مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+    <!-- الهيدر -->
+    <header class="bg-indigo-900 text-white shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">⚙️ لوحة تحكم المدرس والإدارة</h1>
+            <button onclick="toggleDarkMode()" class="bg-indigo-800 hover:bg-indigo-700 p-2 rounded-lg text-sm transition" title="تبديل الوضع الليلي">
+                🌙 / ☀️
+            </button>
+        </div>
+    </header>
+
+    <!-- شاشة تسجيل الدخول الإدارية -->
+    <main id="login-container" class="container mx-auto p-4 flex-grow flex items-center justify-center">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 w-full max-w-md shadow-2xl transition-colors duration-300 text-center">
+            <span class="bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300 text-xs font-semibold px-3 py-1 rounded-full">منطقة محمية خاصة بالإدارة</span>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mt-3 mb-4">تسجيل دخول المدرس</h3>
+            <input type="password" id="teacher-pass" placeholder="أدخل كلمة المرور السرية" class="w-full px-4 py-3 border dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center tracking-widest text-lg">
+            <button onclick="verifyTeacher()" class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition shadow-lg">دخول اللوحة</button>
+        </div>
+    </main>
+
+    <!-- لوحة تحكم المدرس الرئيسية (مخفية لحين الدخول الصحيح) -->
+    <div id="teacher-dashboard" class="hidden container mx-auto p-4 sm:p-8 flex-grow">
+        <div class="max-w-6xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-6 transition-colors duration-300">
+            <div class="flex justify-between items-center border-b dark:border-slate-800 pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-indigo-900 dark:text-indigo-300">📋 إدارة طلاب السادس العلمي والدرجات</h2>
+                <button onclick="location.reload()" class="bg-red-100 dark:bg-red-950/60 hover:bg-red-200 dark:hover:bg-red-900 text-red-700 dark:text-red-300 px-4 py-2 rounded-xl text-sm font-bold transition">
+                    تسجيل خروج ✕
+                </button>
+            </div>
+
+            <!-- حقل البحث بالاسم في لوحة تحكم المدرس -->
+            <div class="mb-4">
+                <input type="text" id="teacher-search-input" onkeyup="filterTeacherStudents()" placeholder="🔍 ابحث عن اسم الطالب..." 
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+
+            <!-- قائمة الطلاب المسجلين -->
+            <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3">الطلاب المسجلون في السحابة:</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-sm">
+                            <th class="p-3 border dark:border-slate-700">اسم الطالب</th>
+                            <th class="p-3 border dark:border-slate-700">الرمز السري</th>
+                            <th class="p-3 border dark:border-slate-700 text-center">إدارة الدرجات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-students-list" class="text-sm">
+                        <!-- يمتلئ من السيرفر -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل درجات طالب معين -->
+    <div id="edit-grades-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-3xl shadow-2xl my-8 transition-colors duration-300">
+            <h3 id="edit-modal-title" class="text-xl font-bold text-indigo-900 dark:text-indigo-300 mb-4">تعديل درجات الطالب</h3>
+            <div id="grades-inputs-container" class="space-y-3 max-h-96 overflow-y-auto p-2">
+                <!-- حقول الدرجات للمواد -->
+            </div>
+            <div class="flex justify-end gap-2 mt-6 border-t dark:border-slate-800 pt-4">
+                <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-xl text-sm text-gray-700 dark:text-gray-200">إلغاء</button>
+                <button onclick="saveStudentGrades()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold">حفظ التعديلات في السحابة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- سكربت لوحة التحكم -->
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://student-grades-1fe83-default-rtdb.firebaseio.com/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        const subjectsList = [
+            "التربية الإسلامية", 
+            "اللغة العربية", 
+            "اللغة الإنجليزية", 
+            "الرياضيات", 
+            "الفيزياء", 
+            "الكيمياء", 
+            "الأحياء", 
+            "الاقتصاد"
+        ];
+
+        let currentEditingStudentKey = null;
+        let allStudentsData = [];
+
+        // التحقق من الوضع الليلي
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function verifyTeacher() {
+            let pass = document.getElementById("teacher-pass").value;
+            // كلمة المرور الجديدة المطلوبة بدقة
+            if(pass === "635201919") {
+                document.getElementById("login-container").classList.add("hidden");
+                document.getElementById("teacher-dashboard").classList.remove("hidden");
+                loadTeacherStudentsList();
+            } else {
+                alert("كلمة المرور غير صحيحة!");
+            }
+        }
+
+        function loadTeacherStudentsList() {
+            rtdb.ref("students").once("value", (snapshot) => {
+                allStudentsData = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        allStudentsData.push({
+                            key: childSnapshot.key,
+                            val: childSnapshot.val()
+                        });
+                    });
+                }
+                renderStudentsTable(allStudentsData);
+            });
+        }
+
+        function renderStudentsTable(studentsArray) {
+            let listBody = document.getElementById("teacher-students-list");
+            listBody.innerHTML = "";
+            
+            if (studentsArray.length === 0) {
+                listBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-500">لا يوجد طلاب مسجلون أو مطابقين للبحث.</td></tr>`;
+                return;
+            }
+
+            studentsArray.forEach((item) => {
+                let key = item.key;
+                let val = item.val;
+
+                listBody.innerHTML += `
+                    <tr class="border-b dark:border-slate-800">
+                        <td class="p-3 font-medium text-gray-800 dark:text-gray-200">${val.name}</td>
+                        <td class="p-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">${val.code}</td>
+                        <td class="p-3 text-center space-x-2 space-x-reverse">
+                            <button onclick="openEditGrades('${key}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">📝 تعديل الدرجات</button>
+                            <button onclick="deleteStudent('${key}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">🗑️ حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterTeacherStudents() {
+            let query = document.getElementById("teacher-search-input").value.trim().toLowerCase();
+            let filtered = allStudentsData.filter(item => item.val.name.toLowerCase().includes(query));
+            renderStudentsTable(filtered);
+        }
+
+        function deleteStudent(key) {
+            if(confirm("هل أنت متأكد من حذف هذا الطالب نهائياً؟")) {
+                rtdb.ref("students/" + key).remove().then(() => {
+                    loadTeacherStudentsList();
+                });
+            }
+        }
+
+        function openEditGrades(key) {
+            currentEditingStudentKey = key;
+            rtdb.ref("students/" + key).once("value", (snapshot) => {
+                let data = snapshot.val();
+                document.getElementById("edit-modal-title").innerText = "تعديل درجات الطالب: " + data.name;
+                
+                let container = document.getElementById("grades-inputs-container");
+                container.innerHTML = "";
+
+                subjectsList.forEach(subject => {
+                    let g = data.grades && data.grades[subject] ? data.grades[subject] : {c1m1:0, c1m2:0, mid:0, c2m1:0, c2m2:0};
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700">
+                            <h4 class="font-bold text-indigo-900 dark:text-indigo-300 mb-2 text-sm">${subject}</h4>
+                            <div class="grid grid-cols-5 gap-2 text-xs">
+                                <div><label class="block text-gray-500 dark:text-gray-400 mb-1">شهر 1 ك1</label><input type="number" data-sub="${subject}" data-field="c1m1" value="${g.c1m1}" class="grade-input w-full p-1 border dark:border-slate-700 rounded text-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100"></div>
+                                <div><label class="block text-gray-500 dark:text-gray-400 mb-1">شهر 2 ك1</label><input type="number" data-sub="${subject}" data-field="c1m2" value="${g.c1m2}" class="grade-input w-full p-1 border dark:border-slate-700 rounded text-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100"></div>
+                                <div><label class="block text-gray-500 dark:text-gray-400 mb-1">نصف السنة</label><input type="number" data-sub="${subject}" data-field="mid" value="${g.mid}" class="grade-input w-full p-1 border dark:border-slate-700 rounded text-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100"></div>
+                                <div><label class="block text-gray-500 dark:text-gray-400 mb-1">شهر 1 ك2</label><input type="number" data-sub="${subject}" data-field="c2m1" value="${g.c2m1}" class="grade-input w-full p-1 border dark:border-slate-700 rounded text-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100"></div>
+                                <div><label class="block text-gray-500 dark:text-gray-400 mb-1">شهر 2 ك2</label><input type="number" data-sub="${subject}" data-field="c2m2" value="${g.c2m2}" class="grade-input w-full p-1 border dark:border-slate-700 rounded text-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById("edit-grades-modal").classList.remove("hidden");
+            });
+        }
+
+        function closeEditModal() {
+            document.getElementById("edit-grades-modal").classList.add("hidden");
+            currentEditingStudentKey = null;
+        }
+
+        function saveStudentGrades() {
+            if(!currentEditingStudentKey) return;
+
+            let inputs = document.querySelectorAll(".grade-input");
+            let newGrades = {};
+
+            inputs.forEach(input => {
+                let sub = input.getAttribute("data-sub");
+                let field = input.getAttribute("data-field");
+                let val = Number(input.value) || 0;
+
+                if(!newGrades[sub]) {
+                    newGrades[sub] = {};
+                }
+                newGrades[sub][field] = val;
+            });
+
+            rtdb.ref("students/" + currentEditingStudentKey + "/grades").set(newGrades, (error) => {
+                if(error) {
+                    alert("حدث خطأ أثناء الحفظ!");
+                } else {
+                    alert("تم حفظ الدرجات بنجاح في السحابة!");
+                    closeEditModal();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
